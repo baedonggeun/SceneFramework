@@ -1,9 +1,15 @@
 {
-  "name": "com.yourname.Sceneframework",
+  "name": "com.baedonggeun.sceneframework",
   "version": "1.0.0",
   "displayName": "Scene Framework",
-  "description": "A scene management framework for Unity.",
+  "description": "Scene management framework using Addressables and UniTask.",
   "unity": "2021.3",
+  "keywords": [ "scene", "addressables", "unitask", "framework" ],
+  "author": {
+    "name": "Donggeun Bae",
+    "email": "bg94818@naver.com",
+    "url": "https://github.com/baedonggeun"
+  },
   "dependencies": {
     "com.unity.addressables": "1.21.17",
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask"
