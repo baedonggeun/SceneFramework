@@ -13,5 +13,12 @@
   "dependencies": {
     "com.unity.addressables": "1.21.17",
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask"
-  }
+  },
+  "samples": [
+    {
+      "displayName": "Essential Scene Assets",
+      "description": "Preset SO, Addressables config, and resource data.",
+      "path": "Samples"
+    }
+  ]
 }
