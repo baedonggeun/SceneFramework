@@ -1,0 +1,11 @@
+{
+  "name": "com.yourname.Sceneframework",
+  "version": "1.0.0",
+  "displayName": "Scene Framework",
+  "description": "A scene management framework for Unity.",
+  "unity": "2021.3",
+  "dependencies": {
+    "com.unity.addressables": "1.21.17",
+    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask"
+  }
+}
