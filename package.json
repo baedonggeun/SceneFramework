@@ -17,7 +17,7 @@
     {
       "displayName": "Essential Scene Assets",
       "description": "Preset SO, Addressables config, and resource data.",
-      "path": "Samples"
+      "path": "Samples~"
     }
   ]
 }
