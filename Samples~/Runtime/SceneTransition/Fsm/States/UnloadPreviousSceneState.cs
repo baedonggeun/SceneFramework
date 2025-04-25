@@ -14,7 +14,7 @@ public class UnloadPreviousSceneState : ISceneTransitionState
 
         // 프리셋 언로드
         if (context.PreviousPreset != null &&
-            context.PreviousPreset.SceneType != SceneType.Global)
+            context.PreviousPreset.SceneType != SceneKey.Global)
         {
             Debug.Log($"[UnloadPreviousSceneState] 프리셋 언로드: {context.PreviousPreset.SceneName}");
             await ScenePluginExecutor.ExecuteOnUnload(context.PreviousPreset);

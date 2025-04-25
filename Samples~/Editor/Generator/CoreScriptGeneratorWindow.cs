@@ -165,104 +165,35 @@ public class CoreScriptGeneratorWindow : EditorWindow
 
     private string ServiceClassPreview(string className)
     {
-        return $@"public class {className} : MonoSingleton<{className}>, I{className}, IInitializable, IInjectable
-{{
-    public int Priority => 0;
-    public bool AutoInitialize => true;
-
-    public Type[] GetDependencies() => Array.Empty<Type>();
-
-    public async UniTask InitializeAsync()
-    {{
-        await UniTask.Yield(); // Init logic here
-    }}
-}}";
+        return CoreScriptGeneratorUtility.ServiceScriptString(className);
     }
 
     private string ServiceInterfacePreview(string interfaceName)
     {
-        return $@"public interface {interfaceName}
-{{
-    // Define public API here
-}}";
+        return CoreScriptGeneratorUtility.IServiceScriptString(interfaceName);
     }
 
     private string KeyRegistryPreview(string name)
     {
         string enumName = $"{name}Key";
-        string soName = $"{name}KeyRegistrySO";
+        string registrySOName = $"{name}KeyRegistrySO";
+        string accessorName = $"{name}Keys";
 
-        return $@"using UnityEngine;
-using System.Collections.Generic;
-
-[CreateAssetMenu(menuName = ""HybridSceneFramework/KeyRegistry/{soName}"")]
-public class {soName} : ScriptableObject
-{{
-    [System.Serializable]
-    public class {enumName}Entry
-    {{
-        public {enumName} key;
-        public string addressableKey;
-    }}
-
-    [SerializeField] private List<{enumName}Entry> entries;
-    private Dictionary<{enumName}, string> lookup;
-
-    public string GetKey({enumName} key)
-    {{
-        if (lookup == null)
-        {{
-            lookup = new();
-            foreach (var e in entries)
-                lookup[e.key] = e.addressableKey;
-        }}
-        return lookup.TryGetValue(key, out var value) ? value : null;
-    }}
-}}";
+        return CoreScriptGeneratorUtility.KeyRegistrySOScriptString(enumName, registrySOName, accessorName);
     }
 
     private string KeyAccessorPreview(string name)
     {
         string enumName = $"{name}Key";
         string registrySOName = $"{name}KeyRegistrySO";
+        string accessorName = $"{name}Keys";
 
-        return $@"using UnityEngine;
-
-public enum {enumName}
-{{
-    Example1,
-    Example2
-}}
-
-public static class {name}Keys
-{{
-    public static {registrySOName} Registry;
-
-    public static void LoadRegistry()
-    {{
-        if (Registry != null) return;
-
-        Registry = Resources.Load<{registrySOName}>(""KeysSO/{registrySOName.Replace("SO", "")}"");
-        if (Registry == null)
-            Debug.LogError(""[{name}Keys] Registry가 Resources/KeysSO에 없습니다."");
-    }}
-
-    public static string Get({enumName} key)
-    {{
-        LoadRegistry();
-        return Registry?.GetKey(key);
-    }}
-}}";
+        return CoreScriptGeneratorUtility.KeyAccessorScriptString(enumName, registrySOName, accessorName);
     }
 
     private string AddressableSOPreview(string className)
     {
-        return $@"using UnityEngine;
-
-[CreateAssetMenu(fileName = ""{className}"", menuName = ""Game/{className}"")]
-public class {className} : ScriptableObject
-{{
-}}";
+        return CoreScriptGeneratorUtility.AddressableSOScriptString(className);
     }
 }
 #endif

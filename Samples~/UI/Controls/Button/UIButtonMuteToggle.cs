@@ -18,8 +18,8 @@ public class UIButtonMuteToggle : UIButtonBase, IInjectable
         float previous = PlayerPrefs.GetFloat(previousKey);
 
         if (current > 0.1f)
-            _audioManager.MasterMixerController(source, 0f);
+            _audioManager.SetVolume(source, 0f);
         else
-            _audioManager.MasterMixerController(source, previous);
+            _audioManager.SetVolume(source, previous);
     }
 }

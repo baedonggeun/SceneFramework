@@ -33,20 +33,20 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ScenePreset", menuName = "HybridSceneFramework/ScenePreset")]
 public class ScenePresetSO : ScriptableObject
 {
-    [Header("이 ScenePreset에서 직접 사용하는 플러그인들")]
-    [SerializeField] private List<ScenePluginSO> plugins = new();
-
-    [Header("이 Preset에 병합될 다른 Preset들")]
-    [SerializeField] private List<ScenePresetSO> subPresets = new();
-
     [Header("씬 이름 (에디터용 메타 정보)")]
     [SerializeField] private string sceneName;
 
     [Header("씬 타입")]
-    [SerializeField] private SceneType sceneType;
+    [SerializeField] private SceneKey sceneType;
 
     [Header("씬 전환 시 자동 언로드 여부")]
     [SerializeField] private bool autoUnloadOnSceneChange = true;
+
+    [Header("이 Preset에 병합될 다른 Preset들")]
+    [SerializeField] private List<ScenePresetSO> subPresets = new();
+
+    [Header("이 ScenePreset에서 직접 사용하는 플러그인들")]
+    [SerializeField] private List<ScenePluginSO> plugins = new();
 
     public List<ScenePluginSO> Plugins
     {
@@ -69,7 +69,7 @@ public class ScenePresetSO : ScriptableObject
         set => autoUnloadOnSceneChange = value;
     }
 
-    public SceneType SceneType
+    public SceneKey SceneType
     {
         get => sceneType;
         set => sceneType = value;

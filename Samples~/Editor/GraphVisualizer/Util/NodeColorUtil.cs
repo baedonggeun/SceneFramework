@@ -20,9 +20,9 @@ public static class NodeColorUtil
         return nodeTypeColorMap.TryGetValue(type, out var color) ? color : Color.white;
     }
 
-    public static Color GetColorForPreset(SceneType sceneType)
+    public static Color GetColorForPreset(SceneKey sceneType)
     {
-        if (sceneType == SceneType.Global)
+        if (sceneType == SceneKey.Global)
             return GetColorForNodeType(NodeType.Preset);
 
         return GetColorForNodeType(NodeType.Unknown);

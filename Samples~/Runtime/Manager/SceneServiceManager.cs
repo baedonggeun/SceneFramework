@@ -14,8 +14,6 @@ public class SceneServiceManager : MonoSingleton<SceneServiceManager>, ISceneSer
     public bool AutoInitialize => true;
     public Type[] GetDependencies() => Array.Empty<Type>();
 
-    private const string PresetLabel = "ScenePresets";
-
     private readonly Dictionary<string, ScenePresetSO> scenePresets = new();
     private ScenePresetSO currentPreset;
 
@@ -51,7 +49,7 @@ public class SceneServiceManager : MonoSingleton<SceneServiceManager>, ISceneSer
     private async UniTask<ScenePresetSO> LoadPresetForScene(string sceneName)
     {
         AsyncOperationHandle<IList<ScenePresetSO>> handle =
-            Addressables.LoadAssetsAsync<ScenePresetSO>(PresetLabel, _ => { });
+            Addressables.LoadAssetsAsync<ScenePresetSO>(sceneName, _ => { });
 
         await handle.ToUniTask();
 
@@ -91,7 +89,7 @@ public class SceneServiceManager : MonoSingleton<SceneServiceManager>, ISceneSer
         //1. 이전 preset 언로드
         if (currentPreset != null &&
             currentPreset.AutoUnloadOnSceneChange &&
-            currentPreset.SceneType != SceneType.Global)
+            currentPreset.SceneType != SceneKey.Global)
         {
             await ScenePluginExecutor.ExecuteOnUnload(currentPreset);
         }

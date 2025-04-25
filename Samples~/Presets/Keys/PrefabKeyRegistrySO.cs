@@ -11,6 +11,7 @@ public class PrefabKeyRegistrySO : ScriptableObject
         public string addressableKey;
     }
 
+    [Header("Enum 타입 key <-> addressable key 문자열 매핑")]
     [SerializeField] private List<PrefabKeyEntry> entries;
     private Dictionary<PrefabKey, string> lookup;
 

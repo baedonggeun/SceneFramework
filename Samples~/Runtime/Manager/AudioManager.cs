@@ -4,21 +4,8 @@ using System.Collections.Generic;
 using UnityEngine.Audio;
 using System;
 using System.Linq;
-
-public enum SourceName
-{
-    Master, BGM, SFX
-}
-
-public enum BGMName
-{
-    BGM_Main
-}
-
-public enum SFXName
-{
-    SFX_Break
-}
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class AudioManager : MonoSingleton<AudioManager>, IAudioManager, IInitializable, IInjectable
 {
@@ -26,7 +13,8 @@ public class AudioManager : MonoSingleton<AudioManager>, IAudioManager, IInitial
     public bool AutoInitialize => true;
     public Type[] GetDependencies() => Array.Empty<Type>();
 
-    private AudioMixer masterMixer;
+    private Dictionary<AudioMixerKey, AudioMixer> audioMixer = new();
+    private readonly Dictionary<string, AudioMixer> exposedParams = new();
 
     private Dictionary<SourceName, AudioSource> audioSources;
 
@@ -38,21 +26,63 @@ public class AudioManager : MonoSingleton<AudioManager>, IAudioManager, IInitial
         await UniTask.Delay(100); // Simulated Init
     }
 
-    protected override void Awake()
+    protected override async void Awake()
     {
         base.Awake();
 
-        masterMixer = Resources.Load<AudioMixer>("Audio/Master");
+        await LoadAllMixersAsync();
+        CacheExposedParameters();
 
         InitOrAttachSources();
         InitAudioClip();
         InitPlayerPrefs();
+
+        LoadSavedVolume();
     }
 
-    private void Start()
+    private async UniTask LoadAllMixersAsync()
     {
-        SetAudioClip(SourceName.BGM, GetBGMClip(BGMName.BGM_Main), loop: true, playOnAwake: false);
-        Play(SourceName.BGM);
+        AudioMixerKey[] keys = (AudioMixerKey[])Enum.GetValues(typeof(AudioMixerKey));
+        foreach (var key in keys)
+        {
+            string path = AudioKeys.Get(key);
+            if (string.IsNullOrEmpty(path)) continue;
+
+            var handle = Addressables.LoadAssetAsync<AudioMixer>(path);
+            await handle.ToUniTask();
+
+            if (handle.Status == AsyncOperationStatus.Succeeded)
+            {
+                audioMixer[key] = handle.Result;
+            }
+            else
+            {
+                Debug.LogError($"[AudioManager] Failed to load mixer: {key} ({path})");
+            }
+        }
+    }
+
+    private void CacheExposedParameters()
+    {
+        foreach (var mixerPair in audioMixer)
+        {
+            var mixer = mixerPair.Value;
+
+            foreach (SourceName source in Enum.GetValues(typeof(SourceName)))
+            {
+                string param = source.ToString();
+
+                // 이 SetFloat은 실패 여부를 알려주지 않기 때문에,
+                // 뒤에서 GetFloat으로 진짜 존재하는 파라미터인지 확인
+                mixer.SetFloat(param, 0f); // 먼저 설정 시도 (없으면 무시됨)
+
+                float testValue;
+                if (mixer.GetFloat(param, out testValue)) // 성공 시 → 실제로 존재하는 파라미터
+                {
+                    exposedParams[param] = mixer;
+                }
+            }
+        }
     }
 
     private void InitOrAttachSources()
@@ -78,16 +108,29 @@ public class AudioManager : MonoSingleton<AudioManager>, IAudioManager, IInitial
         {
             string cleanedName = RemoveAllExceptSourceName(source.name);
 
-            if (System.Enum.TryParse(cleanedName, out SourceName sourceName))
+            if (Enum.TryParse(cleanedName, out SourceName sourceName))
             {
-                var groups = masterMixer.FindMatchingGroups($"Master/{sourceName}");
-                if (groups.Length == 0)
-                    groups = masterMixer.FindMatchingGroups(sourceName.ToString());
+                AudioMixerGroup foundGroup = null;
 
-                if (groups.Length > 0)
-                    source.outputAudioMixerGroup = groups[0];
+                foreach (var kvp in audioMixer)
+                {
+                    var groups = kvp.Value.FindMatchingGroups(sourceName.ToString());
+                    if (groups.Length > 0)
+                    {
+                        foundGroup = groups[0];
+                        break;
+                    }
+                }
 
-                audioSources.Add(sourceName, source);
+                if (foundGroup != null)
+                {
+                    source.outputAudioMixerGroup = foundGroup;
+                    audioSources[sourceName] = source;
+                }
+                else
+                {
+                    Debug.LogWarning($"[AudioManager] AudioMixerGroup '{sourceName}'를 찾을 수 없습니다.");
+                }
             }
         }
     }
@@ -161,14 +204,19 @@ public class AudioManager : MonoSingleton<AudioManager>, IAudioManager, IInitial
 
     public void Play(SourceName source)
     {
-        if (audioSources.TryGetValue(source, out var audioSource) && audioSource.clip != null)
+        if (!audioSources.TryGetValue(source, out var audioSource))
         {
-            audioSource.Play();
+            Debug.LogWarning($"[AudioManager] AudioSource '{source}' 없음.");
+            return;
         }
-        else
+
+        if (audioSource.clip == null)
         {
-            Debug.LogWarning($"[AudioManager] AudioSource {source}가 비어 있거나 클립이 없습니다.");
+            Debug.LogWarning($"[AudioManager] AudioSource '{source}'에 클립이 지정되지 않았습니다.");
+            return;
         }
+
+        audioSource.Play();
     }
 
     public void Stop(SourceName source)
@@ -201,46 +249,46 @@ public class AudioManager : MonoSingleton<AudioManager>, IAudioManager, IInitial
         }
     }
 
-    public void MasterMixerController(SourceName source, float volume)
+    private void SetExposedVolume(SourceName source, float volume)
     {
-        string key = source.ToString();
-        string previousKey = "previous_" + key;
-
-        if (masterMixer == null)
-        {
-            Debug.LogError("[AudioManager] masterMixer가 null입니다!");
-            return;
-        }
+        string param = source.ToString();
+        string previousKey = "previous_" + param;
 
         volume = Mathf.Max(volume, 0.0001f);
-        masterMixer.SetFloat(source.ToString(), Mathf.Log10(volume) * 20);
+        float dB = Mathf.Log10(volume) * 20;
 
-        PlayerPrefs.SetFloat(previousKey, PlayerPrefs.GetFloat(key));
-        PlayerPrefs.SetFloat(key, volume);
+        if (exposedParams.TryGetValue(param, out var mixer))
+        {
+            mixer.SetFloat(param, dB);
+        }
+        else
+        {
+            Debug.LogWarning($"[AudioManager] '{param}' 파라미터는 어떤 AudioMixer에도 노출되어 있지 않습니다.");
+        }
+
+        PlayerPrefs.SetFloat(previousKey, PlayerPrefs.GetFloat(param));
+        PlayerPrefs.SetFloat(param, volume);
         PlayerPrefs.Save();
     }
 
-    public void LoasSavedVolume()
+    public void LoadSavedVolume()
     {
         foreach (SourceName source in Enum.GetValues(typeof(SourceName)))
         {
             if (PlayerPrefs.HasKey(source.ToString()))
             {
                 float savedVolume = PlayerPrefs.GetFloat(source.ToString());
-                MasterMixerController(source, savedVolume);
+                SetExposedVolume(source, savedVolume);
             }
         }
     }
 
     public float SetVolume(SourceName source, float volume)
     {
-        string key = source.ToString();
-        string previousKey = "previous_" + key;
+        // 1. AudioMixer의 exposed parameter 볼륨 조절
+        SetExposedVolume(source, volume);
 
-        PlayerPrefs.SetFloat(previousKey, PlayerPrefs.GetFloat(key));
-        PlayerPrefs.SetFloat(key, volume);
-        PlayerPrefs.Save();
-
+        // 2. AudioSource 자체 볼륨 조절
         if (audioSources.TryGetValue(source, out AudioSource audioSource))
         {
             audioSource.volume = volume;

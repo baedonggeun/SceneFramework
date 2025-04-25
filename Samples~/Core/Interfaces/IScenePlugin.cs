@@ -11,7 +11,7 @@ public interface IScenePlugin
     bool IsRequired { get; }
 
     // 분류 정보
-    SceneType TargetSceneType { get; }
+    SceneKey TargetSceneType { get; }
     List<string> Labels { get; }
 
     // 실행 로직

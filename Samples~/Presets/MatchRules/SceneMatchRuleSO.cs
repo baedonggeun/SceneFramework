@@ -9,15 +9,15 @@ public class SceneMatchRuleSO : ScriptableObject
     public class SceneMatchEntry
     {
         public string sceneName;       // 예: "IntroScene", "GameScene"
-        public SceneType sceneType;    // 예: Intro, Game, Result
+        public SceneKey sceneType;    // 예: Intro, Game, Result
     }
 
     [Header("씬 이름 ↔ SceneType 매핑")]
     [SerializeField] private List<SceneMatchEntry> entries = new();
 
-    private Dictionary<string, SceneType> lookup;
+    private Dictionary<string, SceneKey> lookup;
 
-    public SceneType GetSceneType(string sceneName)
+    public SceneKey GetSceneType(string sceneName)
     {
         if (lookup == null)
         {
@@ -26,7 +26,7 @@ public class SceneMatchRuleSO : ScriptableObject
 
         return lookup.TryGetValue(sceneName, out var result)
             ? result
-            : SceneType.Intro;  // 기본값 또는 throw
+            : SceneKey.Intro;  // 기본값 또는 throw
     }
 
 #if UNITY_EDITOR

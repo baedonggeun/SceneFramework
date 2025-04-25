@@ -3,14 +3,6 @@ using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using System;
 
-public enum SceneType
-{
-    Intro,
-    Game,
-    Result,
-    Global
-}
-
 public abstract class ScenePluginSO : ScriptableObject, IScenePlugin
 {
     [Header("플러그인 메타데이터")]
@@ -18,7 +10,7 @@ public abstract class ScenePluginSO : ScriptableObject, IScenePlugin
     [SerializeField] private string pluginName;
 
     [Header("플러그인 분류")]
-    [SerializeField] private SceneType targetSceneType;
+    [SerializeField] private SceneKey targetSceneType;
 
     [Tooltip("기능 태그 (UI, Analytics, DebugOnly 등)")]
     [SerializeField] private List<string> labels = new();
@@ -30,7 +22,7 @@ public abstract class ScenePluginSO : ScriptableObject, IScenePlugin
     [SerializeField] private bool isRequired = true;
 
     public string PluginName => pluginName;
-    public SceneType TargetSceneType => targetSceneType;
+    public SceneKey TargetSceneType => targetSceneType;
     public List<string> Labels => labels;
     public int Priority => priority;
     public bool IsRequired => isRequired;

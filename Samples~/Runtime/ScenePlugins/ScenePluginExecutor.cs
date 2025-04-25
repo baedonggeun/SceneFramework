@@ -50,7 +50,7 @@ public static class ScenePluginExecutor
 
         foreach (var plugin in sortedPlugins)
         {
-            bool isGlobal = preset.SceneType == SceneType.Global;
+            bool isGlobal = preset.SceneType == SceneKey.Global;
 
             if (isGlobal && globalLoadedPlugins.Contains(plugin)) continue;
 
@@ -63,30 +63,24 @@ public static class ScenePluginExecutor
                     globalLoadedPlugins.Add(plugin);
             }
             catch (Exception ex)
-            {
-                Debug.LogError($"[PluginExecutor:OnLoad] {plugin.PluginName} 실패: {ex.Message}");
-            }
+            { Debug.LogError($"[PluginExecutor:OnLoad] {plugin.PluginName} 실패: {ex.Message}"); }
         }
     }
 
     // 병합된 전체 플러그인 리스트를 역순으로 정렬하여 언로드
     public static async UniTask ExecuteOnUnload(ScenePresetSO preset)
     {
-        if (preset.SceneType == SceneType.Global)
+        if (preset.SceneType == SceneKey.Global)
             return;
 
         var plugins = preset.GetAllPlugins().Where(p => p != null).Reverse();
 
         foreach (var plugin in plugins)
         {
-            try
-            {
-                await plugin.OnUnload(preset);
-            }
+            try 
+            { await plugin.OnUnload(preset); }
             catch (Exception ex)
-            {
-                Debug.LogError($"[PluginExecutor:OnUnload] {plugin.PluginName} 실패: {ex.Message}");
-            }
+            { Debug.LogError($"[PluginExecutor:OnUnload] {plugin.PluginName} 실패: {ex.Message}"); }
         }
     }
 

@@ -8,7 +8,7 @@ public static class PrefabKeys
     {
         if (Registry != null) return;
 
-        Registry = Resources.Load<PrefabKeyRegistrySO>("KeysSO/SOKeyRegistry");
+        Registry = Resources.Load<PrefabKeyRegistrySO>("KeysSO/PrefabKeyRegistrySO");
         if (Registry == null)
             Debug.LogError("[PrefabKeys] Registry가 Resources 폴더에 없습니다.");
     }

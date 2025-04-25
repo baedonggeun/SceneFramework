@@ -8,7 +8,7 @@ public static class UIKeys
     {
         if (Registry != null) return;
 
-        Registry = Resources.Load<UIKeyRegistrySO>("KeysSO/UIKeyRegistry");
+        Registry = Resources.Load<UIKeyRegistrySO>("KeysSO/UIKeyRegistrySO");
         if (Registry == null)
             Debug.LogError("[UIKeys] Registry가 Resources 폴더에 없습니다.");
     }

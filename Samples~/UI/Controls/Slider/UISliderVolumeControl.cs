@@ -9,7 +9,7 @@ public class UISliderVolumeControl : UISliderBase, IInjectable
 
     protected override void OnValueChanged(float value)
     {
-        _audioManager.MasterMixerController(source, value);
+        _audioManager.SetVolume(source, value);
 
         PlayerPrefs.SetFloat("previous_" + source, PlayerPrefs.GetFloat(source.ToString()));
         PlayerPrefs.SetFloat(source.ToString(), value);

@@ -11,6 +11,7 @@ public class UIKeyRegistrySO : ScriptableObject
         public string addressableKey;
     }
 
+    [Header("Enum 타입 key <-> addressable key 문자열 매핑")]
     [SerializeField] private List<UIKeyEntry> entries;
     private Dictionary<UIKey, string> lookup;
 

@@ -9,7 +9,19 @@ public static class CoreScriptGeneratorUtility
     {
         string interfaceName = $"I{className}";
 
-        string classContent = $@"using UnityEngine;
+        string classContent = ServiceScriptString(className);
+
+        string interfaceContent = IServiceScriptString(interfaceName);
+
+        File.WriteAllText(Path.Combine(folderPath, $"{className}.cs"), classContent);
+        File.WriteAllText(Path.Combine(folderPath, $"{interfaceName}.cs"), interfaceContent);
+    }
+
+    public static string ServiceScriptString(string className)
+    {
+        string interfaceName = $"I{className}";
+
+        return $@"using UnityEngine;
 using Cysharp.Threading.Tasks;
 using System;
 
@@ -25,14 +37,14 @@ public class {className} : MonoSingleton<{className}>, {interfaceName}, IInitial
         await UniTask.Yield(); // Init logic here
     }}
 }}";
+    }
 
-        string interfaceContent = $@"public interface {interfaceName}
+    public static string IServiceScriptString(string interfaceName)
+    {
+        return $@"public interface {interfaceName}
 {{
     // Define public API here
 }}";
-
-        File.WriteAllText(Path.Combine(folderPath, $"{className}.cs"), classContent);
-        File.WriteAllText(Path.Combine(folderPath, $"{interfaceName}.cs"), interfaceContent);
     }
 
     public static void GenerateKeySystemScript(string keySystemName, string folderPath)
@@ -45,7 +57,17 @@ public class {className} : MonoSingleton<{className}>, {interfaceName}, IInitial
         string registrySOName = $"{keySystemName}KeyRegistrySO";
         string accessorName = $"{keySystemName}Keys";
 
-        string registryContent = $@"using UnityEngine;
+        string registryContent = KeyRegistrySOScriptString(enumName, registrySOName, accessorName);
+
+        string accessorContent = KeyAccessorScriptString(enumName, registrySOName, accessorName);
+
+        File.WriteAllText(Path.Combine(folderPath, $"{registrySOName}.cs"), registryContent);
+        File.WriteAllText(Path.Combine(folderPath, $"{accessorName}.cs"), accessorContent);
+    }
+
+    public static string KeyRegistrySOScriptString(string enumName, string registrySOName, string accessorName)
+    {
+        return $@"using UnityEngine;
 using System.Collections.Generic;
 
 [CreateAssetMenu(menuName = ""HybridSceneFramework/KeyRegistry/{registrySOName}"")]
@@ -58,6 +80,7 @@ public class {registrySOName} : ScriptableObject
         public string addressableKey;
     }}
 
+    [Header(""Enum 타입 key <-> addressable key 문자열 매핑"")]
     [SerializeField] private List<{enumName}Entry> entries;
     private Dictionary<{enumName}, string> lookup;
 
@@ -72,14 +95,11 @@ public class {registrySOName} : ScriptableObject
         return lookup.TryGetValue(key, out var value) ? value : null;
     }}
 }}";
+    }
 
-        string accessorContent = $@"using UnityEngine;
-
-public enum {enumName}
-{{
-    Example1,
-    Example2
-}}
+    public static string KeyAccessorScriptString(string enumName, string registrySOName, string accessorName)
+    {
+        return $@"using UnityEngine;
 
 public static class {accessorName}
 {{
@@ -89,7 +109,7 @@ public static class {accessorName}
     {{
         if (Registry != null) return;
 
-        Registry = Resources.Load<{registrySOName}>(""KeysSO/{registrySOName.Replace("SO", "")}"");
+        Registry = Resources.Load<{registrySOName}>(""KeysSO/{registrySOName}"");
         if (Registry == null)
             Debug.LogError(""[{accessorName}] Registry가 Resources 폴더에 없습니다."");
     }}
@@ -100,21 +120,23 @@ public static class {accessorName}
         return Registry?.GetKey(key);
     }}
 }}";
-
-        File.WriteAllText(Path.Combine(folderPath, $"{registrySOName}.cs"), registryContent);
-        File.WriteAllText(Path.Combine(folderPath, $"{accessorName}.cs"), accessorContent);
     }
 
     public static void GenerateAddressableSO(string className, string folderPath)
     {
-        string content = $@"using UnityEngine;
+        string content = AddressableSOScriptString(className);
+
+        File.WriteAllText(Path.Combine(folderPath, $"{className}.cs"), content);
+    }
+
+    public static string AddressableSOScriptString(string className)
+    {
+        return $@"using UnityEngine;
 
 [CreateAssetMenu(fileName = ""{className}"", menuName = ""Game/{className}"")]
 public class {className} : ScriptableObject
 {{
 }}";
-
-        File.WriteAllText(Path.Combine(folderPath, $"{className}.cs"), content);
     }
 }
 #endif

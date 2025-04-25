@@ -16,7 +16,7 @@ public class RequiredPluginRule : IPresetValidationRule
         var targetScene = preset.SceneType;
 
         var requiredPlugins = allAvailable
-            .Where(p => p.IsRequired && (p.TargetSceneType == targetScene || p.TargetSceneType == SceneType.Global));
+            .Where(p => p.IsRequired && (p.TargetSceneType == targetScene || p.TargetSceneType == SceneKey.Global));
 
         foreach (var required in requiredPlugins)
         {

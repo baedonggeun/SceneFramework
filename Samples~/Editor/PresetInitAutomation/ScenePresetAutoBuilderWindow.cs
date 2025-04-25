@@ -75,7 +75,7 @@ public class ScenePresetAutoBuilderWindow : EditorWindow
         var sceneType = matchRule.GetSceneType(targetPreset.SceneName);
 
         var filtered = allPlugins
-            .Where(p => p.TargetSceneType == sceneType || p.TargetSceneType == SceneType.Global)
+            .Where(p => p.TargetSceneType == sceneType || p.TargetSceneType == SceneKey.Global)
             .ToList();
 
         discoveredPlugins = SortByDependencyAndPriority(filtered);

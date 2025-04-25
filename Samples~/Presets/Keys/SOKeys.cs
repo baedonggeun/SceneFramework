@@ -8,7 +8,7 @@ public static class SOKeys
     {
         if (Registry != null) return;
 
-        Registry = Resources.Load<SOKeyRegistrySO>("KeysSO/SOKeyRegistry");
+        Registry = Resources.Load<SOKeyRegistrySO>("KeysSO/SOKeyRegistrySO");
         if (Registry == null)
             Debug.LogError("[SOKeys] Registry가 Resources 폴더에 없습니다.");
     }
