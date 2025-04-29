@@ -30,6 +30,11 @@ public class SceneTransitionManager : MonoSingleton<SceneTransitionManager>, ISc
     {
         Debug.Log($"[SceneTransition] TryTransition: {targetScene}");
 
+        if (previousPreset == null && SceneServiceManager.Instance != null)
+        {
+            previousPreset = _sceneServiceManager.CurrentPreset;
+        }
+
         //1. FSM Context 구성
         var context = SceneTransitionContext.Create(
             targetSceneName: targetScene,
@@ -52,7 +57,7 @@ public class SceneTransitionManager : MonoSingleton<SceneTransitionManager>, ISc
             await fsm.Run(context);
 
             //4. 성공 시 내부 상태 갱신
-            currentSceneName = targetScene;
+            currentSceneName = context.TargetSceneName;
             loadedSceneInstance = context.LoadedSceneInstance;
             previousPreset = context.TargetPreset;
 

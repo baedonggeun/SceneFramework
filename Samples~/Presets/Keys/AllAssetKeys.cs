@@ -2,7 +2,10 @@
 public enum SceneKey
 {
     Intro,
-    Game,
+    Home,
+    School,
+    Club,
+    Loading,
     Global
 }
 
@@ -25,7 +28,8 @@ public enum SOKey
 //addressable 에 등록된 UI Prefab의 addressable key 와 같아야 함
 public enum UIKey
 {
-    LoadingUI
+    LoadingUI,
+    Intro
 }
 
 //addressable 에 등록된 Prefab의 addressable key 와 같아야 함

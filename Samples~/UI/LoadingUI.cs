@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public class LoadingUI : UIBase
 {
     private UISliderTransitionLoading slider;

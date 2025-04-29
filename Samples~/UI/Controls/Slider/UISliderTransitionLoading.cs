@@ -21,6 +21,7 @@ public class UISliderTransitionLoading : UISliderBase
     public void SetProgress(float progress)
     {
         if (slider == null) return;
-        slider.value = Mathf.Clamp01(progress);
+        float clamped = Mathf.Clamp01(progress);
+        slider.value = clamped;
     }
 }

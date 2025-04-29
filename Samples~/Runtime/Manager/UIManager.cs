@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine.AddressableAssets;
 using System;
+using Unity.VisualScripting;
 
 public class UIManager : MonoSingleton<UIManager>, IUIManager, IInitializable, IInjectable
 {
@@ -11,8 +12,10 @@ public class UIManager : MonoSingleton<UIManager>, IUIManager, IInitializable, I
     public bool AutoInitialize => true;
     public Type[] GetDependencies() => Array.Empty<Type>();
 
-
     private readonly Dictionary<string, UIBase> uiList = new();
+
+    private GameObject globalUICanvasGO;
+    private Canvas globalUICanvas;
 
     public async UniTask InitializeAsync()
     {
@@ -117,50 +120,6 @@ public class UIManager : MonoSingleton<UIManager>, IUIManager, IInitializable, I
         }
 
         uiList.Remove(uiName);
-    }
-
-    // 글로벌 UI 전용 확장
-    public async UniTask<T> PrepareGlobalUIAsync<T>(string uiKey) where T : UIBase
-    {
-        if (uiList.TryGetValue(uiKey, out var existingUI) && existingUI is T globalUI)
-        {
-            globalUI.gameObject.SetActive(false);
-            return globalUI;
-        }
-
-        GameObject prefab = await Addressables.LoadAssetAsync<GameObject>(uiKey);
-        if (prefab == null)
-        {
-            Debug.LogError($"[UIManager] 글로벌 UI 프리팹 로드 실패: {uiKey}");
-            return null;
-        }
-
-        var canvasGO = new GameObject(uiKey + "_GlobalCanvas");
-        Canvas canvas = canvasGO.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-
-        var scaler = canvasGO.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1280, 760);
-        canvasGO.AddComponent<GraphicRaycaster>();
-
-        var instance = GameObject.Instantiate(prefab, canvasGO.transform);
-        instance.name = uiKey;
-
-        var ui = instance.GetComponent<T>();
-        if (ui == null)
-        {
-            Debug.LogError($"[UIManager] 글로벌 UI 프리팹에 UIBase 없음: {uiKey}");
-            return null;
-        }
-
-        ui.canvas = canvas;
-        ui.canvas.sortingOrder = uiList.Count;
-        uiList[uiKey] = ui;
-        DontDestroyOnLoad(canvasGO);
-        InjectRunner.TryInjectAll(instance, SceneServiceManager.CurrentRegistry.AsDictionary());
-        instance.SetActive(false);
-        return ui;
     }
 
     public void ActivateGlobalUI(string uiKey)

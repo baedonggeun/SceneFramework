@@ -25,8 +25,8 @@ public abstract class UIBase : MonoBehaviour
 
     public virtual bool IsGlobalUI() => false;
 
-    // 이 UI에서 기본적으로 캐싱할 컴포넌트 타입 목록을 반환합니다.
-    // 하위 클래스에서 오버라이드하여 설정하세요.
+    // 이 UI에서 기본적으로 캐싱할 컴포넌트 타입 목록을 반환
+    // 하위 클래스에서 오버라이드하여 설정
     protected virtual Type[] GetDefaultCacheTypes() => Array.Empty<Type>();
 
     protected virtual T GetUI<T>(string name) where T : Component

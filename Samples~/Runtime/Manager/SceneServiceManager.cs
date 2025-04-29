@@ -16,6 +16,7 @@ public class SceneServiceManager : MonoSingleton<SceneServiceManager>, ISceneSer
 
     private readonly Dictionary<string, ScenePresetSO> scenePresets = new();
     private ScenePresetSO currentPreset;
+    public ScenePresetSO CurrentPreset => currentPreset;
 
     public static InjectRegistry CurrentRegistry { get; private set; }
 

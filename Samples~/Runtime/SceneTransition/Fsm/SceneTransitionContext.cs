@@ -14,6 +14,7 @@ public class SceneTransitionContext
 
     // 로딩 UI
     public LoadingUI LoadingUIInstance { get; set; }
+    public SceneInstance? LoadingSceneInstance { get; set; }
 
     // 필수 매니저
     public IUIManager IUIManager { get; set; }

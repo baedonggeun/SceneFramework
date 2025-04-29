@@ -7,8 +7,6 @@ public interface IUIManager
     UniTask<UIBase> ShowByNameAsync(string uiName);
     void Hide<T>() where T : UIBase;
     void Hide(string uiName);
-
-    UniTask<T> PrepareGlobalUIAsync<T>(string uiKey) where T : UIBase;
     void ActivateGlobalUI(string uiKey);
     void DeactivateGlobalUI(string uiKey);
 
